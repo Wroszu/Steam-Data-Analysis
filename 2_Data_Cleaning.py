@@ -74,7 +74,7 @@ def print_steam_links(df):
 if __name__ == '__main__':
     
     # read in downloaded data
-    raw_steam_data = pd.read_csv('C:/Users/wrosz/Desktop/Python/Spyder/Projekty/006_Steam_Database_for_APPs/2_files/steam_app_data.csv')
+    raw_steam_data = pd.read_csv('/home/wroszu/Python_Projects/Connected-with-repo/Steam-Data-Analysis-FILES/2_files/steam_app_data.csv')
     
     # print out number of rows and columns
     print('Rows:', raw_steam_data.shape[0])
