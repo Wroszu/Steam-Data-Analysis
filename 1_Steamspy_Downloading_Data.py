@@ -184,7 +184,7 @@ def get_page_number(download_path, data_filename):
 if __name__ == '__main__':
     
     # set file parameters
-    download_path = "C:/Users/wrosz/Desktop/Python/Spyder/Projekty/006_Steam_Database_for_APPs/1_files"
+    download_path = "/home/wroszu/Python_Projects/Connected-with-repo/Steam-Data-Analysis-FILES/1_files"
     steam_app_data = "steam_app_data.csv"
     steam_index = "steam_index.txt"
     
@@ -202,10 +202,10 @@ if __name__ == '__main__':
     app_list = steam_spy_all[['appid', 'name']].sort_values('appid').reset_index(drop=True)
     
     # export disabled to keep consistency across download sessions
-    app_list.to_csv('C:/Users/wrosz/Desktop/Python/Spyder/Projekty/006_Steam_Database_for_APPs/1_files/app_list.csv', index=False)
+    app_list.to_csv('/home/wroszu/Python_Projects/Connected-with-repo/Steam-Data-Analysis-FILES/1_files/app_list.csv', index=False)
     
     # instead read from stored csv
-    app_list = pd.read_csv('C:/Users/wrosz/Desktop/Python/Spyder/Projekty/006_Steam_Database_for_APPs/1_files/app_list.csv')
+    app_list = pd.read_csv('/home/wroszu/Python_Projects/Connected-with-repo/Steam-Data-Analysis-FILES/1_files/app_list.csv')
     
     steam_columns = [
     'type', 'name', 'steam_appid', 'required_age', 'is_free', 'controller_support',
@@ -225,11 +225,11 @@ if __name__ == '__main__':
     if index%1000 == 1:
         index = 0
 
-    # wipe or creae data file and write headers if index is 0 and page_number is 0
+    # wipe or create data file and write headers if index is 0 and page_number is 0
     prepare_data_file(download_path, steam_app_data, index, steam_columns, page_number)
 
     # set end and chunksize for demonstration - remove to run through entire app list
     process_batches(parser=parse_steam_request, app_list=app_list, download_path=download_path, data_filename=steam_app_data, index_filename=steam_index, columns=steam_columns, begin=index, batchsize=5)
     
-    Data_downloaded = pd.read_csv('C:/Users/wrosz/Desktop/Python/Spyder/Projekty/006_Steam_Database_for_APPs/1_files/steam_app_data.csv').head(15)
+    Data_downloaded = pd.read_csv('/home/wroszu/Python_Projects/Connected-with-repo/Steam-Data-Analysis-FILES/1_files/steam_app_data.csv').head(15)
 
