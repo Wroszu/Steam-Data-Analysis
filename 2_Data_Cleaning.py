@@ -107,6 +107,6 @@ if __name__ == '__main__':
     initial_processing['price_overview'].isnull().sum()
     initial_processing['is_free'].sum()
     
-    
     d = initial_processing[initial_processing['price_overview'].isnull() & initial_processing['is_free'] == True]
-    print_steam_links(d[:5])
+    #print_steam_links(d[:5])
+    f='stop'
