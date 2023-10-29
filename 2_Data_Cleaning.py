@@ -51,6 +51,20 @@ def process_platforms(df):
     
     return df
 
+def process_price(df):
+    df['price_overview'] = df['price_overview'].apply(lambda i: {'currency': 'PLN', 'initial': -1} if i is np.nan else literal_eval(i))
+    df['currency'] = df['price_overview'].apply(lambda i: i['currency'])
+    df['price'] = df['price_overview'].apply(lambda i: i['initial'])
+    df.loc[df['is_free'], 'price'] = 0
+    df.loc[df['currency']=='EUR', 'price'] *= 4.5
+    df.loc[df['currency']=='USD', 'price'] *= 4.3
+    df['currency'] = df['currency'].apply(lambda i: 'PLN' if i in ['EUR', 'USD'] else i)
+    df.drop(df[df['currency']!='PLN'].index, inplace=True)
+    df.drop(['is_free', 'currency', 'price_overview'], axis=1, inplace=True)
+    df.loc[df['price']>0, 'price'] /= 100
+
+    return df
+
 def process(df):
     df = df.copy()
     df = df.drop_duplicates()
@@ -58,13 +72,14 @@ def process(df):
     df = process_name_type(df)
     df = process_age(df)
     df = process_platforms(df)
+    df = process_price(df)
     
     return df
 
 def print_steam_links(df):
     url_base = "https://store.steampowered.com/app/"
     
-    for row in df.iterrows():
+    for index, row in df.iterrows():
         appid = row['steam_appid']
         name = row['name']
         
@@ -103,10 +118,19 @@ if __name__ == '__main__':
     print(raw_steam_data.shape)
     initial_processing = process(raw_steam_data)
     print(initial_processing.shape)
+
+    # after initial process we can check if 'age' and 'platforms' works well
+    #initial_processing['required_age'].value_counts().sort_index()
+    #initial_processing['platforms'].value_counts()
     
-    initial_processing['price_overview'].isnull().sum()
-    initial_processing['is_free'].sum()
-    
-    d = initial_processing[initial_processing['price_overview'].isnull() & initial_processing['is_free'] == True]
-    #print_steam_links(d[:5])
-    f='stop'
+    # checking if 'is_free' and 'price = null' are always matching
+    #initial_processing['price_overview'].isnull().sum()
+    #initial_processing['is_free'].sum()
+    #initial_processing_wrong_price = initial_processing[initial_processing['price_overview'].isnull() & initial_processing['is_free'] == False]
+    #print_steam_links(initial_processing_wrong_price[:5])
+
+    initial_processing[initial_processing['name'].str.contains('Counter-Strike')].head(10)
+
+    print_steam_links(initial_processing[initial_processing['name'].str.contains('Counter-Strike')])
+
+# %%
