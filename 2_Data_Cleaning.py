@@ -60,8 +60,14 @@ def process_price(df):
     df.loc[df['currency']=='USD', 'price'] *= 4.3
     df['currency'] = df['currency'].apply(lambda i: 'PLN' if i in ['EUR', 'USD'] else i)
     df.drop(df[df['currency']!='PLN'].index, inplace=True)
-    df.drop(['is_free', 'currency', 'price_overview'], axis=1, inplace=True)
-    df.loc[df['price']>0, 'price'] /= 100
+    df=df[df['price']!=-1]
+    df.drop(['is_free', 'currency', 'price_overview', 'packages', 'package_groups'], axis=1, inplace=True)
+    df['price'] /= 100
+
+    return df
+
+def process_language(df):
+    df.dropna(subset=['supported_languages'], inplace=True)
 
     return df
 
@@ -73,6 +79,7 @@ def process(df):
     df = process_age(df)
     df = process_platforms(df)
     df = process_price(df)
+    df = process_language(df)
     
     return df
 
@@ -133,4 +140,19 @@ if __name__ == '__main__':
 
     print_steam_links(initial_processing[initial_processing['name'].str.contains('Counter-Strike')])
 
-# %%
+    # comparation between price and package_groups as we still missing information about '-1' price games
+    #initial_processing[initial_processing['price']==-1].shape[0]
+    #initial_processing[initial_processing['package_groups']=='[]'].shape[0]
+    #missing_price_and_package = initial_processing[(initial_processing['price'] == -1) & (initial_processing['package_groups'] == "[]")]
+    #missing_price_and_package.shape[0]
+    #print_steam_links(missing_price_and_package[-10:-5])
+    #missing_price_with_package = initial_processing[(initial_processing['price'] == -1) & (initial_processing['package_groups'] != "[]")]
+    #missing_price_with_package.shape[0]
+    #print_steam_links(missing_price_with_package[-10:-5])
+
+    # checking if english language is available for game
+    #initial_processing['supported_languages'].value_counts().head(30)
+
+    initial_processing["supported_languages"].isnull().sum()
+
+#%%    
