@@ -68,6 +68,20 @@ def process_price(df):
 
 def process_language(df):
     df.dropna(subset=['supported_languages'], inplace=True)
+    df['english'] = df['supported_languages'].apply(lambda x: 1 if 'english' in x.lower() else 0)
+    df.drop(['supported_languages'], axis=1, inplace=True)
+
+    return df
+
+def process_dev_and_pub(df):
+    df = df[(df['developers'].notnull()) & (df['publishers'] != "['']")].copy()
+    df = df[~(df['developers'].str.contains(';')) & ~(df['publishers'].str.contains(';'))]
+    df = df[(df['publishers'] != "['NA']") & (df['publishers'] != "['N/A']")]
+
+    df['developer'] = df['developers'].apply(lambda x: ';'.join(literal_eval(x)))
+    df['publisher'] = df['publishers'].apply(lambda x: ';'.join(literal_eval(x)))
+
+    df.drop(['developers', 'publishers'], axis=1, inplace=True)
 
     return df
 
@@ -80,6 +94,7 @@ def process(df):
     df = process_platforms(df)
     df = process_price(df)
     df = process_language(df)
+    df = process_dev_and_pub(df)
     
     return df
 
@@ -152,7 +167,16 @@ if __name__ == '__main__':
 
     # checking if english language is available for game
     #initial_processing['supported_languages'].value_counts().head(30)
+    #initial_processing["supported_languages"].isnull().sum()
+    initial_processing[['name', 'english']].head(15)
+    initial_processing['english'].value_counts()
 
-    initial_processing["supported_languages"].isnull().sum()
+    # developers and publishers column, searching for 'null' values and cleaning
+    #initial_processing['developers'].isnull().sum()
+    #initial_processing['publishers'].value_counts().head(10)
+    #initial_processing[initial_processing['publishers']=="['']"].shape[0]
+    #print_steam_links(initial_processing[initial_processing['developers'].isnull()][:5])
+ 
+    initial_processing[['name', 'steam_appid', 'developer', 'publisher']].head(-10)
 
 #%%    
