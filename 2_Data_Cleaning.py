@@ -85,6 +85,13 @@ def process_dev_and_pub(df):
 
     return df
 
+def process_cat_and_gen(df):
+    df = df[(df['categories'].notnull()) & (df['genres'].notnull())]
+    for i in ['categories', 'genres']:
+        df[i] = df[i].apply(lambda x: ';'.join(y['description'] for y in literal_eval(x)))
+
+    return df
+
 def process(df):
     df = df.copy()
     df = df.drop_duplicates()
@@ -95,6 +102,7 @@ def process(df):
     df = process_price(df)
     df = process_language(df)
     df = process_dev_and_pub(df)
+    df = process_cat_and_gen(df)
     
     return df
 
@@ -176,7 +184,12 @@ if __name__ == '__main__':
     #initial_processing['publishers'].value_counts().head(10)
     #initial_processing[initial_processing['publishers']=="['']"].shape[0]
     #print_steam_links(initial_processing[initial_processing['developers'].isnull()][:5])
- 
+    
     initial_processing[['name', 'steam_appid', 'developer', 'publisher']].head(-10)
+    
+    # categories and genres cleaning
+    #initial_processing['categories'].value_counts()
+    #initial_processing['genres'].isnull().sum()
+    #print_steam_links(initial_processing[initial_processing['genres'].isnull()].sample(5, random_state = 0))
 
 #%%    
