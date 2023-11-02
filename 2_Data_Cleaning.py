@@ -30,7 +30,6 @@ def process_name_type(df):
     df = df[df['type'].notnull()]
     df = df[df['name'].notnull()]
     df = df[df['name'] != 'none']
-    
     df = df.drop('type', axis=1)
     
     return df
@@ -38,7 +37,6 @@ def process_name_type(df):
 def process_age(df):
     cut_points = [-1, 0, 3, 7, 12, 16, 2000]
     label_values = [0, 3, 7, 12, 16, 18]
-    
     df['required_age'].replace({'18+': '18'}, inplace=True)
     df['required_age'] = pd.to_numeric(df['required_age'])
     df['required_age'] = pd.cut(df['required_age'], bins=cut_points, labels=label_values)
@@ -92,6 +90,27 @@ def process_cat_and_gen(df):
 
     return df
 
+def process_achiev_recom_and_desc(df):
+    df.drop(['content_descriptors'], axis=1, inplace=True)
+    df['achievements'] = df['achievements'].apply(lambda x: 0 if x is np.nan else literal_eval(x)['total'])
+    df['recommendations'] = df['recommendations'].apply(lambda x: 0 if x is np.nan else literal_eval(x)['total'])
+
+    return df
+
+def export_data(df, filename):
+    filepath = '/home/wroszu/Python_Projects/Connected-with-repo/Steam-Data-Analysis-FILES/2_files/' + filename + '.csv'
+    df.to_csv(filepath, index=False)
+    
+    print("Exported {} to '{}'".format(filename, filepath))
+
+def process_descriptions(df, export=False):
+    if export:
+        description_data = df[['steam_appid', 'detailed_description', 'about_the_game', 'short_description']]
+        export_data(description_data, filename='description_data')
+    df.drop(['detailed_description', 'about_the_game', 'short_description'], axis=1, inplace=True)
+
+    return df
+
 def process(df):
     df = df.copy()
     df = df.drop_duplicates()
@@ -103,7 +122,9 @@ def process(df):
     df = process_language(df)
     df = process_dev_and_pub(df)
     df = process_cat_and_gen(df)
-    
+    df = process_achiev_recom_and_desc(df)
+    df = process_descriptions(df, export=True)
+
     return df
 
 def print_steam_links(df):
@@ -191,5 +212,21 @@ if __name__ == '__main__':
     #initial_processing['categories'].value_counts()
     #initial_processing['genres'].isnull().sum()
     #print_steam_links(initial_processing[initial_processing['genres'].isnull()].sample(5, random_state = 0))
+
+    # achievements and content_descriptors cleaning
+    #initial_processing['achievements'].isnull().sum()
+    #initial_processing['content_descriptors'].isnull().sum()
+    #initial_processing[['name', 'achievements', 'content_descriptors']].head(30)
+    #literal_eval(initial_processing['achievements'][9])
+    #initial_processing['content_descriptors'].value_counts()
+    #initial_processing['achievements'].value_counts()
+
+    initial_processing.head(2)
+
+    # Exporting data which is not useful for now: Descriptions
+    #initial_processing[['detailed_description', 'about_the_game', 'short_description']].isnull().sum()
+    #initial_processing[initial_processing['detailed_description'].isnull()]
+    #initial_processing[initial_processing['detailed_description'].str.len()<=20]
+
 
 #%%    
