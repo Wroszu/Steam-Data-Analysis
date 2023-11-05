@@ -111,6 +111,26 @@ def process_descriptions(df, export=False):
 
     return df
 
+def process_media(df, export=False):
+    if export:
+        media_data = df[['steam_appid', 'header_image', 'screenshots', 'background', 'movies']]
+        export_data(media_data, filename='media_data')
+    df.drop(['header_image', 'screenshots', 'background', 'movies'], axis=1, inplace=True)
+
+    return df
+
+def process_info(df, export=False):
+    if export:
+        support_info_data = df[['steam_appid', 'website', 'support_info']].copy()
+        support_info_data['support_info'] = support_info_data['support_info'].apply(lambda x: literal_eval(x))
+        support_info_data['support_url'] = support_info_data['support_info'].apply(lambda x: x['url'])
+        support_info_data['support_email'] = support_info_data['support_info'].apply(lambda x: x['email'])
+        support_info_data.drop(['support_info'], axis=1, inplace=True)
+        export_data(support_info_data, filename='support_data')
+    df.drop(['support_info', 'website'], axis=1, inplace=True)
+
+    return df
+
 def process(df):
     df = df.copy()
     df = df.drop_duplicates()
@@ -124,6 +144,8 @@ def process(df):
     df = process_cat_and_gen(df)
     df = process_achiev_recom_and_desc(df)
     df = process_descriptions(df, export=True)
+    df = process_media(df, export=True)
+    df = process_info(df, export=True)
 
     return df
 
@@ -227,6 +249,22 @@ if __name__ == '__main__':
     #initial_processing[['detailed_description', 'about_the_game', 'short_description']].isnull().sum()
     #initial_processing[initial_processing['detailed_description'].isnull()]
     #initial_processing[initial_processing['detailed_description'].str.len()<=20]
+    pd.read_csv('/home/wroszu/Python_Projects/Connected-with-repo/Steam-Data-Analysis-FILES/2_files/description_data.csv').head()
 
+    # Exporting data which is not useful for now: Media
+    #for i in ['header_image', 'screenshots', 'background']:
+    #    print(i+':', initial_processing[i].isnull().sum())
+    pd.read_csv('/home/wroszu/Python_Projects/Connected-with-repo/Steam-Data-Analysis-FILES/2_files/media_data.csv').head()
+
+    # Memory usage information
+    raw_steam_data.info(verbose=False, memory_usage="deep")
+    initial_processing.info(verbose=False, memory_usage="deep")
+
+    # Exporting data which is not useful for now: Info
+    #initial_processing[['name', 'website', 'support_info']][50:70]
+    #initial_processing['support_info'].value_counts()
+    pd.read_csv('/home/wroszu/Python_Projects/Connected-with-repo/Steam-Data-Analysis-FILES/2_files/support_data.csv').head()
+
+    
 
 #%%    
