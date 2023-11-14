@@ -19,6 +19,7 @@ import pandas as pd
 
 #%% customisations
 pd.options.display.max_columns = 100
+pd.set_option('display.max_colwidth', None)
 
 #%% functions definition
 def drop_null_cols(df, thresh=0.5):
@@ -135,13 +136,11 @@ def process_requirements(df, export=False):
     if export:
         requirements_data = df[['steam_appid', 'pc_requirements', 'mac_requirements', 'linux_requirements']].copy()
         requirements_data['pc_requirements_clean'] = (requirements_data['pc_requirements']
-                                                        .str.replace(r'\\[rtn]', '')
-                                                        .str.replace(r'<[pbr]{1,2}>', '')
-                                                        .str.replace(r'<[\/"=\w\s]+>', '')
+                                                        .str.replace(r'\\[rtn]', '', regex=True)
+                                                        .str.replace(r'<[pbr]{1,2}>', ' ', regex=True)
+                                                        .str.replace(r'<[\/"=\w\s]+>', '', regex=True)
                                                       )
         requirements_data['pc_requirements_clean'] = requirements_data['pc_requirements_clean'].apply(lambda x: literal_eval(x))
-        requirements_data['minimum_requirements'] = requirements_data['pc_requirements_clean'].apply(lambda x: x['minimum'].replace('Minimum:', '').strip() if 'minimum' in x.keys() else np.nan)
-        requirements_data['recommended_requirements'] = requirements_data['pc_requirements_clean'].apply(lambda x: x['recommended'].replace('Recommended:', '').strip() if 'recommended' in x.keys() else np.nan)
         requirements_data.drop(['pc_requirements_clean'], axis=1, inplace=True)
         export_data(requirements_data, filename='requirements_data')
     df.drop(['pc_requirements', 'mac_requirements', 'linux_requirements'], axis=1, inplace=True)
@@ -163,7 +162,7 @@ def process(df):
     df = process_descriptions(df, export=True)
     df = process_media(df, export=True)
     df = process_info(df, export=True)
-    #df = process_requirements(df, export=True)
+    df = process_requirements(df, export=True)
 
     return df
 
@@ -285,11 +284,17 @@ if __name__ == '__main__':
 
     # Exporting data which is not useful for now: Requirements
     #initial_processing['pc_requirements'].iloc[[0,2000,15000]]
-    ppp = initial_processing[['steam_appid', 'pc_requirements']].copy()
-    ppp = ppp['pc_requirements'].str.replace(r'\\[rtn]', '')
-    ppp = ppp['pc_requirements'].str.replace(r'<[pbr/]+>', ' ')
-    ppp = ppp['pc_requirements'].str.replace(r'<[\/"=\w\s]+>', '')
-    ppp['pc_requirements'] = ppp['pc_requirements'].apply(lambda x: literal_eval(x))
-    ppp.head()
+    #ppp = initial_processing[['steam_appid', 'pc_requirements']].copy()
+    #ppp['clean_pcr'] = (ppp['pc_requirements']
+    #                    .str.replace(r'\\[rtn]', '', regex=True)
+    #                    .str.replace(r'<[pbr]{1,2}>', ' ', regex=True)
+    #                    .str.replace(r'<[\/"=\w\s]+>', '', regex=True)
+    #                    )
+    #ppp['clean_pcr'] = ppp['clean_pcr'].apply(lambda x: literal_eval(x))
+    #ppp.head()
+    #print(ppp['clean_pcr'][1].values())
+
+    initial_processing.head()
+    pd.read_csv('/home/wroszu/Python_Projects/Connected-with-repo/Steam-Data-Analysis-FILES/2_files/requirements_data.csv').head()
 
 #%%    
