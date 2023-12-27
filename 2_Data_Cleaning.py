@@ -147,6 +147,14 @@ def process_requirements(df, export=False):
 
     return df
 
+def process_data_release(df):
+    df['release_date'] = df['release_date'].apply(lambda x: 0 if x is np.nan else literal_eval(x)['date'])
+    df['release_date'] = df['release_date'].apply(lambda x: x.replace(',', ''))
+    df['release_date'] = pd.to_datetime(df['release_date'], format='%d %b %Y', errors='coerce')
+    df = df[df['release_date'].notnull()]
+
+    return df
+
 def process(df):
     df = df.copy()
     df = df.drop_duplicates()
@@ -163,6 +171,7 @@ def process(df):
     df = process_media(df, export=True)
     df = process_info(df, export=True)
     df = process_requirements(df, export=True)
+    df = process_data_release(df)
 
     return df
 
@@ -296,5 +305,10 @@ if __name__ == '__main__':
 
     initial_processing.head()
     pd.read_csv('/home/wroszu/Python_Projects/Connected-with-repo/Steam-Data-Analysis-FILES/2_files/requirements_data.csv').head()
+
+    # Last tests to make sure file is ready to save!
+    #initial_processing.isnull().sum()
+    #initial_processing[initial_processing['release_date'] > '2020-02-02']
+    initial_processing.to_csv('/home/wroszu/Python_Projects/Connected-with-repo/Steam-Data-Analysis-FILES/2_files/initial_processing.csv')
 
 #%%    
