@@ -167,6 +167,14 @@ def parse_steam_request(appid, name):
     
     return data
 
+def parse_steamspy_request(appid, name):
+    url = "https://steamspy.com/api.php"
+    parameters = {"request": "appdetails", "appid": appid}
+    
+    json_data = get_request(url, parameters=parameters)
+
+    return json_data
+
 def get_page_number(download_path, data_filename):
     try:
         rel_path = os.path.join(download_path, data_filename)
@@ -187,9 +195,11 @@ if __name__ == '__main__':
     download_path = "/home/wroszu/Python_Projects/Connected-with-repo/Steam-Data-Analysis-FILES/1_files"
     steam_app_data = "steam_app_data.csv"
     steam_index = "steam_index.txt"
+    steamspy_data = "steamspy_data.csv"
+    steamspy_index = "steamspy_index.txt"
     
     # gathering page number so we can continue file writing
-    page_number = get_page_number(download_path=download_path, data_filename=steam_app_data)
+    page_number = get_page_number(download_path=download_path, data_filename=steamspy_data)
     
     url = 'https://steamspy.com/api.php?request=all&page='+page_number
     parameters = {"request": "all"}
@@ -216,20 +226,31 @@ if __name__ == '__main__':
     'platforms', 'metacritic', 'reviews', 'categories', 'genres', 'screenshots',
     'movies', 'recommendations', 'achievements', 'release_date', 'support_info',
     'background', 'content_descriptors']
+
+    steamspy_columns = [
+    'appid', 'name', 'developer', 'publisher', 'score_rank', 'positive',
+    'negative', 'userscore', 'owners', 'average_forever', 'average_2weeks',
+    'median_forever', 'median_2weeks', 'price', 'initialprice', 'discount',
+    'languages', 'genre', 'ccu', 'tags']
     
     # overwrites last index for demonstration (would usually store highest index so can continue across sessions)
     # reset_index(download_path, steam_index)
+    reset_index(download_path, steamspy_index)
     
     # retrieve last index downloaded from file
-    index = get_index(download_path, steam_index)
+    #index = get_index(download_path, steam_index)
+    index = get_index(download_path, steamspy_index)
     if index%1000 == 1:
         index = 0
 
     # wipe or create data file and write headers if index is 0 and page_number is 0
-    prepare_data_file(download_path, steam_app_data, index, steam_columns, page_number)
+    #prepare_data_file(download_path, steam_app_data, index, steam_columns, page_number)
+    prepare_data_file(download_path, steamspy_data, index, steamspy_columns)
 
     # set end and chunksize for demonstration - remove to run through entire app list
-    process_batches(parser=parse_steam_request, app_list=app_list, download_path=download_path, data_filename=steam_app_data, index_filename=steam_index, columns=steam_columns, begin=index, batchsize=5)
-    
-    Data_downloaded = pd.read_csv('/home/wroszu/Python_Projects/Connected-with-repo/Steam-Data-Analysis-FILES/1_files/steam_app_data.csv').head(15)
+    #process_batches(parser=parse_steam_request, app_list=app_list, download_path=download_path, data_filename=steam_app_data, index_filename=steam_index, columns=steam_columns, begin=index, batchsize=5)
+    process_batches(parser=parse_steamspy_request, app_list=app_list, download_path=download_path,  data_filename=steamspy_data, index_filename=steamspy_index, columns=steamspy_columns, begin=index, end=20, batchsize=5)
+
+    #Data_downloaded = pd.read_csv('/home/wroszu/Python_Projects/Connected-with-repo/Steam-Data-Analysis-FILES/1_files/steam_app_data.csv').head(15)
+    Data_downloaded = pd.read_csv('/home/wroszu/Python_Projects/Connected-with-repo/Steam-Data-Analysis-FILES/1_files/steamspy_data.csv').head(15)
 
